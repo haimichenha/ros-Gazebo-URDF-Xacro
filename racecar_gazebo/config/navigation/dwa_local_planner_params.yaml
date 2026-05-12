@@ -1,0 +1,49 @@
+# 您的“稳中求进”版参数，已修正为ROS Noetic兼容格式
+DWAPlannerROS:
+  # 【机器人配置】 - 速度和加速度限制
+  acc_lim_x: 1.5
+  acc_lim_theta: 2.9      # 【您的设置】
+  acc_lim_y: 0.0
+
+  max_vel_x: 0.35
+  min_vel_x: -0.15         # 【您的设置】允许倒车
+
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+  
+  # 【【【已修正为新参数名】】】
+  max_vel_trans: 1.2
+  min_vel_trans: 0.1
+
+  # 【【【已修正为新参数名】】】
+  max_vel_theta: 1.9      # 【您的设置】
+  min_vel_theta: 0.2      # 【您的设置】
+
+  # 【目标公差】
+  yaw_goal_tolerance: 0.2
+  xy_goal_tolerance: 0.15
+  latch_xy_goal_tolerance: false
+
+  # 【前向仿真参数】
+  sim_time: 1.7
+  sim_granularity: 0.025
+  vx_samples: 8
+  vy_samples: 1
+  vtheta_samples: 25      # 【您的设置】
+
+  # 【路径评分（性格核心）】
+  path_distance_bias: 32.0
+  goal_distance_bias: 24.0
+  occdist_scale: 0.03     # 【您的设置】
+
+  forward_point_distance: 0.325
+  stop_time_buffer: 0.4
+  scaling_speed: 0.25
+  max_scaling_factor: 0.2
+
+  # 【振荡抑制】
+  oscillation_reset_dist: 0.05
+
+  # 【调试参数】
+  publish_traj_pc: true
+  publish_cost_grid_pc: true

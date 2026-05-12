@@ -1,0 +1,63 @@
+<!-- 文件名: racecar_navigation.launch (最终无错版 - 默认导航) -->
+<launch>
+    <param name="/use_sim_time" value="true"/>
+
+    <!-- 阶段一：启动仿真环境 -->
+    <include file="$(find racecar_gazebo)/launch/racecar.launch"/>
+
+    <!-- 阶段二：延迟启动导航和RViz -->
+
+    <node name="map_server" pkg="map_server" type="map_server" 
+          args="$(find racecar_gazebo)/maps/map_hh.yaml"
+          launch-prefix="bash -c 'sleep 3.0; $0 $@'"/>
+
+    <!-- 
+        【【【 最终修正 】】】
+        将 amcl.xml 的内容直接写在 <node> 标签中，以便应用 launch-prefix。
+        这是解决 <include> 不支持延迟的唯一正确方法。
+    -->
+    <node pkg="amcl" type="amcl" name="amcl"
+          launch-prefix="bash -c 'sleep 4.0; $0 $@'">
+        <!-- 从 amcl.xml 复制的核心参数 -->
+        <param name="use_map_topic" value="true"/>
+        <param name="odom_model_type" value="diff"/>
+        <param name="odom_frame_id" value="odom"/>
+        <param name="base_frame_id" value="base_footprint"/>
+        <param name="global_frame_id" value="map"/>
+        <param name="min_particles" value="500"/>
+        <param name="max_particles" value="2000"/>
+        <param name="update_min_d" value="0.2"/>
+        <param name="update_min_a" value="0.5"/>
+        <!-- 为默认地图设置一个准确的初始位姿猜测 -->
+        <param name="initial_pose_x" value="-0.5"/>
+        <param name="initial_pose_y" value="-0.05"/>
+        <param name="initial_pose_a" value="0.0"/>
+    </node>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"
+          launch-prefix="bash -c 'sleep 5.0; $0 $@'">
+        <!-- 完整保留所有原始 move_base 参数 -->
+        <rosparam file="$(find racecar_gazebo)/config/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/dwa_local_planner_params.yaml" command="load" />
+		
+        <param name="controller_patience" value="15.0" />
+        <param name="planner_patience" value="10.0" />
+        <param name="base_global_planner" value="navfn/NavfnROS" />
+        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+        <param name="planner_frequency" value="10.0" />
+        <param name="planner_patience" value="5.0" />
+        <param name="controller_frequency" value="10.0" />
+        <param name="controller_patience" value="15.0" />
+        <param name="clearing_rotation_allowed" value="false" /> 
+    </node>
+    
+    <node name="rviz" pkg="rviz" type="rviz"                                                
+          args="-d $(find racecar_gazebo)/rviz/navigation.rviz" required="true"
+          launch-prefix="bash -c 'sleep 5.0; $0 $@'"/>
+    
+    <node name="racecar_navigation" pkg="racecar_gazebo" type="racecar_navigation.py"
+          launch-prefix="bash -c 'sleep 5.0; $0 $@'"/>
+</launch>

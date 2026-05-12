@@ -1,0 +1,17 @@
+<!-- 文件名: manual_drive.launch -->
+<launch>
+    <!-- 允许外部传入世界文件 -->
+    <arg name="world_file" default="$(find racecar_gazebo)/worlds/racecar_runway.world"/>
+    <arg name="x_pos" default="-0.5"/>
+    <arg name="y_pos" default="-0.05"/>
+
+    <!-- 启动Gazebo和机器人模型 -->
+    <include file="$(find racecar_gazebo)/launch/racecar.launch">
+        <arg name="world_name" value="$(arg world_file)"/>
+        <arg name="x_pos" value="$(arg x_pos)"/>
+        <arg name="y_pos" value="$(arg y_pos)"/>
+    </include>
+    
+    <!-- 【【【 核心：只启动键盘控制节点 】】】 -->
+   <node name="keyboard_remote_controller" pkg="racecar_gazebo" type="XL_keyboard_remote.py" output="screen" launch-prefix="gnome-terminal --" />
+</launch>

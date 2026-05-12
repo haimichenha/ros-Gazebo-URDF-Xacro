@@ -1,0 +1,30 @@
+# ROS build artifacts
+build/
+devel/
+install/
+.catkin_tools/
+.catkin_workspace
+
+# Python/cache/temp
+__pycache__/
+*.py[cod]
+*.log
+*.tmp
+.cache/
+
+# ROS runtime data
+*.bag
+*.active
+*.orig
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# VM / large local-only artifacts
+*.vmdk
+*.vmx
+*.vmem
+*.iso

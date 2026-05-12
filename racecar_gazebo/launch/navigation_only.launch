@@ -1,0 +1,32 @@
+<!-- 文件名: navigation_only.launch -->
+<launch>
+    <!-- 设置使用仿真时间 -->
+    <param name="/use_sim_time" value="true"/>
+
+    <!-- 定义可以从外部配置的参数 -->
+    <arg name="map_file" />
+    <arg name="local_planner" />
+    <arg name="planner_config_file" />
+
+    <!-- 启动导航组件 -->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+    <node pkg="amcl" type="amcl" name="amcl">
+        <param name="use_map_topic" value="true"/>
+        <param name="odom_model_type" value="diff"/>
+        <param name="odom_frame_id" value="odom"/>
+        <param name="base_frame_id" value="base_footprint"/>
+        <param name="global_frame_id" value="map"/>
+    </node>
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find racecar_gazebo)/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find racecar_gazebo)/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find racecar_gazebo)/navigation/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find racecar_gazebo)/navigation/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(arg planner_config_file)" command="load" />
+        <param name="base_local_planner" value="$(arg local_planner)" />
+        <param name="base_global_planner" value="navfn/NavfnROS" />
+    </node>
+
+    <!-- RViz 可视化 -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racecar_gazebo)/rviz/navigation.rviz" required="true" />
+</launch>

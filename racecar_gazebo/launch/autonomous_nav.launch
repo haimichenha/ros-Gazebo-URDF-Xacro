@@ -1,0 +1,55 @@
+<!-- 文件名: autonomous_nav.launch (最终修复版) -->
+<launch>
+    <param name="/use_sim_time" value="true"/>
+    <arg name="world_file" />
+    <arg name="map_file" />
+    <arg name="x_pos"      default="0.0"/>
+    <arg name="y_pos"      default="0.0"/>
+    <arg name="local_planner" />
+    <arg name="planner_config_file" />
+    
+    <include file="$(find racecar_gazebo)/launch/racecar.launch">
+        <arg name="world_name" value="$(arg world_file)"/>
+        <arg name="x_pos" value="$(arg x_pos)"/>
+        <arg name="y_pos" value="$(arg y_pos)"/>
+    </include>
+    
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" launch-prefix="bash -c 'sleep 3.0; $0 $@'"/>
+    
+    <node pkg="amcl" type="amcl" name="amcl" launch-prefix="bash -c 'sleep 4.0; $0 $@'">
+        <param name="use_map_topic" value="true"/>
+        <param name="odom_model_type" value="diff"/>
+        <param name="odom_frame_id" value="odom"/>
+        <param name="base_frame_id" value="base_footprint"/>
+        <param name="global_frame_id" value="map"/>
+        <param name="min_particles" value="500"/>
+        <param name="max_particles" value="2000"/>
+    </node>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" launch-prefix="bash -c 'sleep 5.0; $0 $@'">
+        <!-- 加载所有 costmap 参数 -->
+        <rosparam file="$(find racecar_gazebo)/config/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find racecar_gazebo)/config/navigation/global_costmap_params.yaml" command="load" />
+        
+        <!-- 加载由Qt传入的动态算法参数文件 -->
+        <rosparam file="$(arg planner_config_file)" command="load" />
+        
+        <!-- 设置由Qt传入的动态局部规划器 -->
+        <param name="base_local_planner" value="$(arg local_planner)" />
+        
+        <!-- 【【【 核心修正：补上所有缺失的关键参数！！！】】】 -->
+        <param name="base_global_planner" value="navfn/NavfnROS" />
+        <param name="controller_patience" value="15.0" />
+        <param name="planner_patience" value="10.0" />
+        <param name="planner_frequency" value="10.0" />
+        <param name="controller_frequency" value="10.0" />
+        <param name="clearing_rotation_allowed" value="false" />
+    </node>
+    
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find racecar_gazebo)/rviz/navigation.rviz" required="true" launch-prefix="bash -c 'sleep 5.0; $0 $@'"/>
+    <node name="racecar_navigation" pkg="racecar_gazebo" type="racecar_navigation.py"
+          launch-prefix="bash -c 'sleep 5.0; $0 $@'"/>
+          
+</launch>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>qt_app</name>
+  <version>0.1.0</version>
+  <description>A Qt GUI for controlling a ROS robot.</description>
+
+  <maintainer email="your_email@todo.com">Your Name</maintainer>
+  <license>BSD</license>
+
+  <!-- buildtool_depend 是构建系统本身，通常是catkin -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- 
+    下面是我们的包在编译时(build)和运行时(exec)都需要的依赖。
+    这个列表必须和 CMakeLists.txt 中的 find_package(catkin COMPONENTS ...) 列表保持一致！
+  -->
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf</depend>
+  <depend>image_transport</depend>
+  <depend>cv_bridge</depend>
+
+  <!-- 我们直接依赖Qt5，所以不再需要 qt_build -->
+
+</package>
+

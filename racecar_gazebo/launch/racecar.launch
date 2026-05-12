@@ -1,0 +1,51 @@
+<!-- 文件名: racecar_gazebo/launch/racecar.launch (已修复空格错误) -->
+<launch>
+    <arg name="world_name" default="$(find racecar_gazebo)/worlds/racecar_runway.world"/>
+
+    <param name="/use_sim_time" value="true"/>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="x_pos" default="-0.5"/>
+    <arg name="y_pos" default="-0.05"/>
+    <arg name="z_pos" default="0.0"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+        <arg name="world_name" value="$(arg world_name)"/> 
+    </include>
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find racecar_description)/urdf/racecar.urdf.xacro'"/>
+    
+    <node name = "robot_state_publisher" pkg = "robot_state_publisher" type = "robot_state_publisher">
+        <param name="publish_frequency" type="double" value="20.0" />
+        <!-- 【【【 错误已在此处修复：删除了 'static' 后面的空格 】】】 -->
+        <param name="use_tf_static" type="bool" value="false" />
+        <remap from="/joint_states" to="/racecar/joint_states"/>
+    </node>
+    
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-urdf -model shcrobot -param robot_description -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos)"/>
+        
+    <rosparam file="$(find racecar_gazebo)/config/racecar_control.yaml" command="load"/>
+
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="true" output="screen" ns="/racecar" 
+        args="joint_state_controller 
+        left_rear_wheel_velocity_controller 
+        right_rear_wheel_velocity_controller 
+        left_front_wheel_velocity_controller 
+        right_front_wheel_velocity_controller 
+        left_steering_hinge_position_controller 
+        right_steering_hinge_position_controller"/>
+
+    <node name="XL_controller_cmd" pkg="racecar_gazebo" type="XL_controller_cmd.py" output="screen"></node>
+    <!-- <node name="keyboard_remote_controller" pkg="racecar_gazebo" type="XL_keyboard_remote.py" output="screen" launch-prefix="gnome-terminal - -" /> -->
+    <include file="$(find rf2o_laser_odometry)/launch/rf2o_laser_odometry.launch"></include>
+
+</launch>
